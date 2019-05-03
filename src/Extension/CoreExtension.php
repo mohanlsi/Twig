@@ -1689,7 +1689,7 @@ function twig_array_batch($items, $size, $fill = null, $preserveKeys = true)
 function twig_array_filter($array, $arrow)
 {
     if (\is_array($array)) {
-        return array_filter($array, $arrow);
+        return array_filter($array, $arrow, \PHP_VERSION_ID >= 50600 ? \ARRAY_FILTER_USE_BOTH : 0);
     }
 
     return new \CallbackFilterIterator($array, $arrow);
@@ -1697,11 +1697,12 @@ function twig_array_filter($array, $arrow)
 
 function twig_array_map($array, $arrow)
 {
-    if (!\is_array($array)) {
-        $array = iterator_to_array($array);
+    $r = [];
+    foreach ($array as $k => $v) {
+        $r[$k] = $arrow($v, $k);
     }
 
-    return array_map($arrow, $array);
+    return $r;
 }
 
 function twig_array_reduce($array, $arrow, $initial = null)
